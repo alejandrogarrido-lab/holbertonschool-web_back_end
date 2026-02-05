@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-"""Log stats"""
+"""Nginx log stats stored in MongoDB."""
 
 from pymongo import MongoClient
 
 
-if __name__ == "__main__":
+def main():
+    """Print required stats."""
     client = MongoClient("mongodb://127.0.0.1:27017")
-    col = client.logs.nginx
+    collection = client.logs.nginx
 
-    print("{} logs".format(col.count()))
+    total = collection.count_documents({})
+    print(f"{total} logs")
     print("Methods:")
 
-    for m in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
-        print("\tmethod {}: {}".format(m, col.count({"method": m})))
+    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    for method in methods:
+        count = collection.count_documents({"method": method})
+        print(f"\tmethod {method}: {count}")
 
-    print("{} status check".format(
-        col.count({"method": "GET", "path": "/status"})
-    ))
+    status = collection.count_documents({"method": "GET", "path": "/status"})
+    print(f"{status} status check")
+
+
+if __name__ == "__main__":
+    main()
